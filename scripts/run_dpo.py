@@ -45,7 +45,7 @@ logger = logging.getLogger(__name__)
 def main():
     parser = H4ArgumentParser((ModelArguments, DataArguments, DPOConfig))
     model_args, data_args, training_args = parser.parse()
-    training_args.save_steps = 10
+    training_args.save_steps = 50
 
     #######
     # Setup

@@ -28,21 +28,21 @@ beta: 0.1
 do_eval: true
 evaluation_strategy: epoch
 eval_steps: 100
-gradient_accumulation_steps: 8
+gradient_accumulation_steps: 4
 gradient_checkpointing: true
 gradient_checkpointing_kwargs:
   use_reentrant: false
 hub_model_id: zephyr-ds
-learning_rate: 5.0e-7
+learning_rate: 1.0e-5
 log_level: info
-logging_steps: 100
+logging_steps: 10
 lr_scheduler_type: linear
 max_length: 1024
 max_prompt_length: 512
 num_train_epochs: 1
 optim: rmsprop
 loss_type: sigmoid
-output_dir: data/zephyr-full # It is handy to append `hub_model_revision` to keep track of your local experiments
+output_dir: data/zephyr-full-1e-5 # It is handy to append `hub_model_revision` to keep track of your local experiments
 per_device_train_batch_size: 4
 per_device_eval_batch_size: 4
 push_to_hub: true
@@ -52,4 +52,4 @@ save_total_limit: null
 seed: 42
 warmup_ratio: 0.1
 data_selection: true
-Gamma: 0.05
+Gamma: 0.2

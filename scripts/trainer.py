@@ -458,16 +458,21 @@ class DPOTrainer(Trainer):
         # print(chosen_rewards, rejected_rewards) # batch_size
         # Gamma = -0.1
         # self.Gamma = 0.05
-        flag = (chosen_rewards - rejected_rewards + self.Gamma).sign().to(chosen_rewards.device)
-        counter = torch.zeros_like(chosen_rewards).to(chosen_rewards.device)
-        counter[(chosen_rewards - rejected_rewards).abs() > self.Gamma] = 1
-        neglected = torch.count_nonzero(counter).detach().cpu()
-        self.use_labeled += (counter.shape[0] - neglected)
-        self.predicted_label += neglected
-        flag.requires_grad = False
         
-        logits = (pi_logratios - ref_logratios)*flag
-        # logits = (pi_logratios - ref_logratios)
+        if self.data_selection:
+            flag = (chosen_rewards - rejected_rewards + self.Gamma).sign().to(chosen_rewards.device)
+            counter = torch.zeros_like(chosen_rewards).to(chosen_rewards.device)
+            counter[(chosen_rewards - rejected_rewards).abs() > self.Gamma] = 1
+            neglected = torch.count_nonzero(counter).detach().cpu()
+            self.use_labeled += (counter.shape[0] - neglected)
+            self.predicted_label += neglected
+            print(self.use_labeled, self.predicted_label)
+            flag.requires_grad = False
+            
+            logits = (pi_logratios - ref_logratios)*flag
+        
+        else:
+            logits = (pi_logratios - ref_logratios)
 
         if self.loss_type == "sigmoid":
             losses = -F.logsigmoid(self.beta * logits)
