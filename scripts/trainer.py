@@ -466,7 +466,8 @@ class DPOTrainer(Trainer):
             neglected = torch.count_nonzero(counter).detach().cpu()
             self.use_labeled += (counter.shape[0] - neglected)
             self.predicted_label += neglected
-            print(self.use_labeled, self.predicted_label)
+            # print(self.use_labeled, self.predicted_label)
+            # print(flag)
             flag.requires_grad = False
             
             logits = (pi_logratios - ref_logratios)*flag
