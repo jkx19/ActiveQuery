@@ -35,7 +35,9 @@
   <script defer src="static/js/fontawesome.all.min.js"></script>
   <script src="static/js/bulma-carousel.min.js"></script>
   <script src="static/js/bulma-slider.min.js"></script>
-  <script src="static/js/index.js"></script>
+  <script src="static/js/index.js"></script>  
+    <SCRIPT SRC='https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'></SCRIPT>
+    <SCRIPT>MathJax.Hub.Config({ tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}})</SCRIPT>
 </head>
 <body>
 
@@ -45,7 +47,7 @@
       <div class="container is-max-desktop">
         <div class="columns is-centered">
           <div class="column has-text-centered">
-            <h1 class="title is-1 publication-title">Rephrase and Respond: Let Large Language Models Ask Better Questions for Themselves</h1>
+            <h1 class="title is-1 publication-title">Reinforcement Learning from Human Feedback with Active Queries</h1>
             <div class="is-size-5 publication-authors">
               <!-- Paper authors -->
               <span class="author-block">
@@ -78,7 +80,7 @@
 
                   <!-- Github link -->
                   <span class="link-block">
-                    <a href="https://github.com/uclaml/Rephrase-and-Respond" target="_blank"
+                    <a href="https://github.com/jkx19/ActiveQuery/tree/web" target="_blank"
                     class="external-link button is-normal is-rounded is-dark">
                     <span class="icon">
                       <i class="fab fa-github"></i>
@@ -121,145 +123,72 @@
 </section>
 <!-- End paper abstract -->
 
-<!-- Rephrase and Respond (RaR). -->
+<!-- APPO. -->
 <div class="columns is-centered">
-  <div class="column is-three-fifths">
-    <h2 class="title is-3">Active Direct Preference Optimization</h2>
-
-    <img src="images/demo_RaR.png" alt="MY ALT TEXT"/>
-      <h2 class="subtitle has-text-centered">
-        The Algorithm of ADPO. In each 
-      </h2>
-    <!-- RaR -->
-    <h3 class="title is-4">(One-step) RaR</h3>
-    <div class="content has-text-justified">
-      <p>
-        Direct Preference Optimization (DPO) has shown good performance in aligning large language models (LLM) with human preference. However, DPO training requires large amount of data (e.g., zephry-7b uses 60k human labeled data for DPO training). We adapt active learning to DPO and propose a label efficient DPO training method.
-      </p>
-      <!-- <pre><code>
-        "{question}"
-        Rephrase and expand the question, and respond.
-      </code></pre> -->
-    </div>
-    <br/>
-    <!--/ RaR. -->
-
-    <!-- Two-step RaR -->
-    <h3 class="title is-4">Uncertainty-based Active Query</h3>
-    <div class="content has-text-justified">
-      <p>
-        For each piece of prompt and the two answers, DPO treat the LLM as a reward model and assign rewards to the answers. Therefore, the difference of the two scores indicates the model's confidence of its prediction of the label. In ADPO, LLM will only queries the laebls of those answer pairs with high uncertainty. For those with low uncertainty, LLM will use its predicted label as its training target.
-      </p>
-      <!-- <pre><code>
-        "{question}"
-        Given the above question, rephrase and expand it to help you do better answering. Maintain all information in the original question.
-      </code></pre> -->
-    </div>
-    <!--/ Two-step RaR -->
-
-  </div>
-</div>
-<!--/ Rephrase and Respond (RaR). -->
-
-<!-- Motivating Example. -->
-<div class="columns is-centered">
-  <div class="column is-three-fifths">
-    <h2 class="title is-3">Experiment Results</h2>
+    <div class="column is-three-fifths">
+      <h2 class="title is-3">Active Proximal Policy Optimization</h2>
+  
+      <img src="images/algo.png" alt="MY ALT TEXT"/>
+        <h2 class="subtitle has-text-centered">
+          The details of our algorithm Active Proximal Policy Optimization
+        </h2>
+      <h3 class="title is-4">(One-step) RaR</h3>
       <div class="content has-text-justified">
         <p>
-          Why are we interested in RaR? Let's investigate the following motivating example. 
-          When posed with the query, "Was Mother Teresa born on an even month?"" GPT-4 might mistakenly assert that August is an odd month. 
-          We take a step further to investigate the intrinsic reason for LLM's inefficiency in answering such questions. 
-          As shown in the other three conversations in the figure, when GPT-4 explains its reasoning, 
-          it appears that the model has several ambiguities toward the questions. 
-          For example, it may consider February as odd due to its irregular number of days and sometimes consider an even/odd month 
-          to be months with an even/odd number of days. 
+          We propose Active Proximal Policy Optimization (APPO) for learning linear contextual bandits with global sub-optimal gap. In each round, the algorithm first use the following MLE estimator to estimate the parameter:
+          $$ \lambda\kappa_{\sigma} \btheta + \sum_{\tau \in \cC_{t-1}}\Big(o_{\tau} - \mu\big(\langle \btheta, \bphi^1_{\tau}-\bphi^2_{\tau} \rangle\big)\Big) (\bphi^1_{\tau}-\bphi^2_{\tau}) = \bold{0} $$.
+          With the estimated parameter, APPO then compute the estimated reward and choose the best arm. APPO will not query for the label if the uncertainty is low. Our theoretical analysis shows the following guarantees regarding regret upper bound and query complexity.
         </p>
-        <p>
-          In this paper, we highlight an often-overlooked aspect of studies in LLMs: the disparity between human and LLM thought frames. 
-          To tackle this problem, we propose to let the LLM to rephrase the question and incorporate additional details for better answering.
-          Upon rephrasing by the LLM itself, the newly generated question is more detailed and has a clearer question format, 
-          as presented in the figure. This self-rephrasing technique leads to significant improvement in accuracy, 
-          as shown in the barplot. 
-        </p>
-    </div>
-  </div>
-</div>
-<!--/ Motivating Example. -->
-<!-- Image carousel -->
-<section class="hero is-small">
-  <div class="hero-body">
-    <div class="container">
-      <div id="results-carousel" class="carousel results-carousel">
-       <div class="item">
-        <!-- Your image here -->
-        <img src="images/demo_even_month.png" alt="MY ALT TEXT"/>
-        <h2 class="subtitle has-text-centered">
-          Ambiguities exist in the human-crafted questions, resulting in LLMs responding to unintended questions.
-        </h2>
+        <img src="images/them.png" alt="MY ALT TEXT"/>
       </div>
-      <div class="item">
-        <!-- Your image here -->
-        <img src="images/demo_refine.png" alt="MY ALT TEXT"/>
-        <h2 class="subtitle has-text-centered">
-          GPT-4's rephrased questions can significantly improve its own performance.
-        </h2>
-      </div>
+      <br/>
     </div>
-  </div>
 </div>
-</div>
-</section>
-<!-- End image carousel -->
+<!--/ APPO. -->
 
-<!-- Results. -->
+<!-- ADPO. -->
 <div class="columns is-centered">
-  <div class="column is-three-fifths">
-    <h2 class="title is-3">Results</h2>
+    <div class="column is-three-fifths">
+      <h2 class="title is-3">Active Direct Preference Optimization</h2>
+
+      <h3 class="title is-4">Method</h3>
       <div class="content has-text-justified">
         <p>
-          We investigate the performance of ADPO by comparing the accuracy of GPT-4 with One-step RaR and Two-step RaR. 
-          Notably, both One-step RaR and Two-step RaR significantly improve GPT-4's accuracy. 
-          Notably, for tasks that GPT-4 originally finds
-          highly challenging, RaR exhibits remarkable improvement even to almost 100% accuracy. 
-          Indeed, similar to human communication, rephrasing and elaborating a question
-          and then answering is an effective approach. In summary: 
+          We further proposed Active Direct Preference Optimization (ADPO) as a label-efficient alternative to Direct Preference Optimization. For each piece of prompt and the two answers, DPO treat the LLM as a reward model and assign rewards to the answers. Therefore, the difference of the two scores indicates the model's confidence of its prediction of the label. In ADPO, LLM will only queries the laebls of those answer pairs with high uncertainty. For those with low uncertainty, LLM will use its predicted label as its training target.
+        </p>
+        <!-- <img src="images/them.png" alt="MY ALT TEXT"/> -->
+      </div>
+      <br/>
+      <!--/ RaR. -->
+  
+      <!-- Two-step RaR -->
+      <h3 class="title is-4">Experiment Results</h3>
+      <div class="content has-text-justified">
+        <p>
+          We trained zephry-7b-sft-full on the 62k Ultrachat-Feedback dataset using both DPO and our method ADPO. We evaluate the trained models on Open LLM LeaderBoard dataset. We also tested the performance of our method but without training on the pseudo-labels (denoted as ADPO w/o PL). Here are the key points of our results:
         </p>
         <ul>
-          <li>(One-step) RaR provides a universal, plug-and-play black-box prompt that allows for efficient and effective performance improvement of LLMs on general tasks.</li>
-          <li>Two-step RaR provides a universal method for LLMs to improve the question quality autonomously by rephrasing the question.</li>
-          <li>Examining the question quality is pivotal when evaluating the LLM performance on QA tasks.</li>
-        </ul>
-    </div>
-  </div>
-</div>
-<!--/ Results. -->
-<!-- Image carousel -->
-<section class="hero is-small">
-  <div class="hero-body">
-    <div class="container">
-      <div id="results-carousel" class="carousel results-carousel">
-       <div class="item">
-        <!-- Your image here -->
-        <img src="images/tasks.png" alt="MY ALT TEXT"/>
-        <h2 class="subtitle has-text-centered">
-          Overview of the tasks we evaluated on. The table includes tasks we used in later sections.
-        </h2>
+            <li>while only quering about half (32k in 62k) of human preference labels than DPO, ADPO outperforms DPO on Arc Challenge, TruthfulQA, HellaSwag dataset and get a higher average score than DPO; </li>
+            <li>without the pseudo-labels predicted by the LLM, the performance of ADPO w/o PL can no longer out perform DPO, so the pseudo-labels play a key role in ADPO; </li>
+          </ul>
+        <img src="images/them.png" alt="MY ALT TEXT"/>
       </div>
-      <div class="item">
-        <!-- Your image here -->
-        <img src="images/tasks_res.png" alt="MY ALT TEXT"/>
+      <br/>
+
+      <img src="images/table.png" alt="MY ALT TEXT"/>
         <h2 class="subtitle has-text-centered">
-          Accuracy (%) comparison of different prompts using GPT-4. Both One-step RaR and Two-step RaR
-          effectively improve the accuracy of GPT-4 across 10 tasks.
+          The results of DPO and ADPO. ADPO outperforms DPO with only half queries
         </h2>
-      </div>
+
+      <img src="images/chart.png" alt="MY ALT TEXT"/>
+        <h2 class="subtitle has-text-centered">
+          The training curves of DPO, ADPO w/o PL and ADPO on different datasets. ADPO enjoys a faster improvement than DPO and ADPO w/o PL.
+        </h2>
+  
     </div>
-  </div>
 </div>
-</div>
-</section>
-<!-- End image carousel -->
+<!--/ ADPO. -->
+
 
 <!-- Results. -->
 <div class="columns is-centered">
@@ -304,55 +233,6 @@
         <img src="images/models_table.png" alt="MY ALT TEXT"/>
         <h2 class="subtitle has-text-centered">
           Comparison of GPT-4's rephrased questions with Vicuna's self-rephrased questions.
-        </h2>
-      </div>
-    </div>
-  </div>
-</div>
-</div>
-</section>
-<!-- End image carousel -->
-
-<!-- Results. -->
-<div class="columns is-centered">
-  <div class="column is-three-fifths">
-    <h2 class="title is-3">Comparison with Chain-of-Thought</h2>
-      <div class="content has-text-justified">
-        <p>
-          We compare RaR with CoT. 
-          We present the mathematical formualtions of RaR and CoT and compare them with each other. 
-          We also present experimental results to show that (1) RaR offers improvements in scenarios where 
-          zero-shot CoT is ineffective; and (2) RaR addresses and corrects the shortcomings inherent in few-shot CoT.
-        </p>
-    </div>
-  </div>
-</div>
-<!--/ Results. -->
-<!-- Image carousel -->
-<section class="hero is-small">
-  <div class="hero-body">
-    <div class="container">
-      <div id="results-carousel" class="carousel results-carousel">
-       <div class="item">
-        <!-- Your image here -->
-        <img src="images/math.png" alt="MY ALT TEXT"/>
-        <h2 class="subtitle has-text-centered">
-          Demonstration of our mathematical formulation of CoT and RaR.
-        </h2>
-      </div>
-      <div class="item">
-        <!-- Your image here -->
-        <img src="images/question_quality.png" alt="MY ALT TEXT"/>
-        <h2 class="subtitle has-text-centered">
-          Demonstration of the importance of question quality as compared to reasoning in the coin flip question.
-        </h2>
-      </div>
-      <div class="item">
-        <!-- Your image here -->
-        <img src="images/few_shot.png" alt="MY ALT TEXT"/>
-        <h2 class="subtitle has-text-centered">
-          A badly crafted QA example, as shown in red, result in the LLM following the provided logic but reaching an arbitrary answer. 
-          Meanwhile, our prompt can successfully correct the pitfalls in the few-shot examples and improve the robustness and efficacy of few-shot CoT.
         </h2>
       </div>
     </div>
