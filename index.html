@@ -136,7 +136,7 @@
       <div class="content has-text-justified">
         <p>
           We propose Active Proximal Policy Optimization (APPO) for learning linear contextual bandits with global sub-optimal gap. In each round, the algorithm first use the following MLE estimator to estimate the parameter:
-          $$ \lambda\kappa_{\sigma} \btheta + \sum_{\tau \in \cC_{t-1}}\Big(o_{\tau} - \mu\big(\langle \btheta, \bphi^1_{\tau}-\bphi^2_{\tau} \rangle\big)\Big) (\bphi^1_{\tau}-\bphi^2_{\tau}) = \bold{0} $$.
+          $$ \lambda\kappa_{\sigma} \bm{theta} + \sum_{\tau \in \mathcal{C}_{t-1}}\Big(o_{\tau} - \mu\big(\langle \bm{theta}, \bm{phi}^1_{\tau}-\bm{phi}^2_{\tau} \rangle\big)\Big) (\bm{phi}^1_{\tau}-\bm{phi}^2_{\tau}) = \bm{0} $$.
           With the estimated parameter, APPO then compute the estimated reward and choose the best arm. APPO will not query for the label if the uncertainty is low. Our theoretical analysis shows the following guarantees regarding regret upper bound and query complexity.
         </p>
         <img src="images/them.png" alt="MY ALT TEXT"/>
