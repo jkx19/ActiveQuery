@@ -1,4 +1,4 @@
-export HF_HOME="/data/jkx/.cache/"
+
 export CUDA_VISIBLE_DEVICES="4,5,6,7"
 
 # EDIT data_selection, Gamma in config.yaml
