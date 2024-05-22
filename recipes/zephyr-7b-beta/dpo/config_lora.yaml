@@ -25,15 +25,17 @@ preprocessing_num_workers: 12
 # DPOTrainer arguments
 bf16: true
 beta: 0.1
+data_selection: true
 do_eval: true
 evaluation_strategy: epoch
 eval_steps: 100
-gradient_accumulation_steps: 8
+Gamma: 2.0
+gradient_accumulation_steps: 4
 gradient_checkpointing: true
 gradient_checkpointing_kwargs:
   use_reentrant: false
 hub_model_id: zephyr-ds
-learning_rate: 1.0e-5
+learning_rate: 5.0e-5
 log_level: info
 logging_steps: 10
 lr_scheduler_type: linear
@@ -42,7 +44,7 @@ max_prompt_length: 512
 num_train_epochs: 1
 optim: rmsprop
 loss_type: sigmoid
-output_dir: data/zephyr-full-1e-5-psd # It is handy to append `hub_model_revision` to keep track of your local experiments
+output_dir: data/zephyr-full-5e-5-psd # It is handy to append `hub_model_revision` to keep track of your local experiments
 per_device_train_batch_size: 4
 per_device_eval_batch_size: 4
 push_to_hub: true
@@ -51,5 +53,3 @@ save_steps: 100
 save_total_limit: null
 seed: 42
 warmup_ratio: 0.1
-data_selection: true
-Gamma: 1.3

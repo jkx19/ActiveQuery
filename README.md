@@ -67,7 +67,7 @@ You can now check out the `scripts` and `recipes` directories for instructions o
 
 ## Running 
 
-First checkout `recipes/zephyr-7b-beta/dpo/config_lora.yaml` and set the following arguments. gradient_accumulation_steps, loss_type (choose from "corr", "sigmoid", "hinge") and per_device_train_batch_size. Then edit --num_processes in `pipeline.sh`. Make sure gradient_accumulation_steps\*per_device_train_batch_size\*num_processes=true_batch_size. Then run the following command in shell:
+First checkout `recipes/zephyr-7b-beta/dpo/config_lora.yaml` and set the following arguments. gradient_accumulation_steps, loss_type (choose from "corr", "sigmoid", "hinge") and data_selection (true for ADPO and false for DPO) and per_device_train_batch_size. Then edit --num_processes in `pipeline.sh`. Make sure gradient_accumulation_steps\*per_device_train_batch_size\*num_processes=true_batch_size. Then run the following command in shell:
 
 ```
 bash pipeline.sh
