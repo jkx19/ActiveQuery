@@ -145,5 +145,3 @@ setup(
         "Topic :: Scientific/Engineering :: Artificial Intelligence",
     ],
 )
-​​​
-Shift + Enter to add a new line

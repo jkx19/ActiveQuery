@@ -37,7 +37,7 @@ python3 -m pip install -e .
 To reproduce the results in our paper, please follow the steps below. To replicate the results on Zephyr-β, please run the following command.
 
 ```
-ACCELERATE_LOG_LEVEL=info accelerate launch --config_file recipes/accelerate_configs/deepspeed_zero3.yaml --num_processes=8 --main_process_port 30000 scripts/run_dpo.py recipes/zephyr-7b-beta/dpo/config_full.yaml \
+ACCELERATE_LOG_LEVEL=info accelerate launch --config_file recipes/accelerate_configs/deepspeed_zero3.yaml --num_processes=8 --main_process_port 30000 scripts/run_dpo.py recipes/training_configs/zephyr-beta.yaml \
 --beta=0.1 \
 --data_selection=true \
 --Gamma=1.3 \
@@ -47,7 +47,7 @@ ACCELERATE_LOG_LEVEL=info accelerate launch --config_file recipes/accelerate_con
 To replicate the results on Zephyr-gemma, please run the following command.
 
 ```
-ACCELERATE_LOG_LEVEL=info accelerate launch --config_file recipes/accelerate_configs/deepspeed_zero3.yaml --num_processes=8 --main_process_port 30000 scripts/run_dpo.py recipes/zephyr-7b-gemma/dpo/config_full.yaml \
+ACCELERATE_LOG_LEVEL=info accelerate launch --config_file recipes/accelerate_configs/deepspeed_zero3.yaml --num_processes=8 --main_process_port 30000 scripts/run_dpo.py recipes/training_configs/zephyr-gemma.yaml \
 --beta=0.1 \
 --data_selection=true \
 --Gamma=1.3 \
