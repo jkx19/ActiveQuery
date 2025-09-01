@@ -6,69 +6,72 @@
     🤗 <a href="https://huggingface.co/collections/alignment-handbook/handbook-v01-models-and-datasets-654e424d22e6880da5ebc015" target="_blank">Models & Datasets</a> | 📃 <a href="https://arxiv.org/abs/2310.16944" target="_blank">Technical Report</a>
 </p> -->
 
-# The Alignment Handbook
+# Active Direct Preference Optimization (ADPO)
 
-## Installation instructions
+This repository contains the official code for the paper "[Reinforcement Learning from Human Feedback with Active Queries](https://arxiv.org/abs/2402.09401)".
 
-To run the code in this project, first, create a Python virtual environment using e.g. Conda:
+Authors: Kaixuan Ji*, Jiafan He*, Quanquan Gu
 
-```shell
-conda create -n handbook python=3.10 && conda activate handbook
-```
 
-Next, install PyTorch `v2.1.0` - the precise version is important for reproducibility! Since this is hardware-dependent, we
-direct you to the [PyTorch Installation Page](https://pytorch.org/get-started/locally/).
+## About ADPO
 
-You can then install the remaining package dependencies as follows:
+Active Direct Preference Optimization (ADPO) serves as a query-efficient alternative to direct prefernce optimization (DPO). More Specifically, at each training step, ADPO first compute estimate the model's uncertainty of each preference pair. ADPO only queries for the preference labels of those pairs with low confidence scores. For the pairs with high confidence scores, ADPO uses the predicted preference label (pseudo-label) to update the model. Experiments on Zephyr-β and Zephyr-gemma shows that ADPO matches the performance of DPO with only one quarters of queries needed. You can check our [paper](https://arxiv.org/abs/2402.09401) for more details.
 
-```shell
-git clone https://github.com/huggingface/alignment-handbook.git
-cd ./alignment-handbook/
-python -m pip install .
-```
+## Environment Setup
 
-You will also need Flash Attention 2 installed, which can be done by running:
-
-> **Note**
-> If your machine has less than 96GB of RAM and many CPU cores, reduce the MAX_JOBS., e.g. `MAX_JOBS=4 pip install flash-attn --no-build-isolation`
-
-```shell
-python -m pip install flash-attn --no-build-isolation
-```
-
-Next, log into your Hugging Face account as follows:
-
-```shell
-huggingface-cli login
-```
-
-Finally, install Git LFS so that you can push models to the Hugging Face Hub:
-
-```shell
-sudo apt-get install git-lfs
-```
-
-You can now check out the `scripts` and `recipes` directories for instructions on how to train some models 🪁!
-
-## Project structure
+The following steps provide the necessary setup to run our codes. First, create a conda environment as follows
 
 ```
-├── LICENSE
-├── Makefile                    <- Makefile with commands like `make style`
-├── README.md                   <- The top-level README for developers using this project
-├── chapters                    <- Educational content to render on hf.co/learn
-├── recipes                     <- Recipe configs, accelerate configs, slurm scripts
-├── scripts                     <- Scripts to train and evaluate chat models
-├── setup.cfg                   <- Installation config (mostly used for configuring code quality & tests)
-├── setup.py                    <- Makes project pip installable (pip install -e .) so `alignment` can be imported
-├── src                         <- Source code for use in this project
-└── tests                       <- Unit tests
+conda create -n adpo python=3.10.9
+conda activate adpo
 ```
 
-## Running 
-
-First checkout `recipes/zephyr-7b-beta/dpo/config_lora.yaml` and set the following arguments. gradient_accumulation_steps, loss_type (choose from "corr", "sigmoid", "hinge") and data_selection (true for ADPO and false for DPO) and per_device_train_batch_size. Then edit --num_processes in `pipeline.sh`. Make sure gradient_accumulation_steps\*per_device_train_batch_size\*num_processes=true_batch_size. Then run the following command in shell:
+Next, install the required packages as follows
 
 ```
-bash pipeline.sh
+python3 -m pip install -e .
 ```
+
+## Reproducing Results
+
+To reproduce the results in our paper, please follow the steps below. To replicate the results on Zephyr-β, please run the following command.
+
+```
+ACCELERATE_LOG_LEVEL=info accelerate launch --config_file recipes/accelerate_configs/deepspeed_zero3.yaml --num_processes=8 --main_process_port 30000 scripts/run_dpo.py recipes/zephyr-7b-beta/dpo/config_full.yaml \
+--beta=0.1 \
+--data_selection=true \
+--Gamma=1.3 \
+--num_train_epochs=1 \
+--output_dir={path_to_your_output_dir}
+```
+To replicate the results on Zephyr-gemma, please run the following command.
+
+```
+ACCELERATE_LOG_LEVEL=info accelerate launch --config_file recipes/accelerate_configs/deepspeed_zero3.yaml --num_processes=8 --main_process_port 30000 scripts/run_dpo.py recipes/zephyr-7b-gemma/dpo/config_full.yaml \
+--beta=0.1 \
+--data_selection=true \
+--Gamma=1.3 \
+--num_train_epochs=1 \
+--output_dir={path_to_your_output_dir}
+```
+
+In both commands, `\beta` is the weight of the KL divergence term in the loss function, and `data_selection` is a boolean flag to enable active querying. When active-querying is enabled, `Gamma` is the confidence threshold $\gamma$ for active querying. Please refer to the [recipe file for Zephyr-β](recipes/zephyr-7b-beta/dpo/config_full.yaml) or [recipe file for Zephyr-gemma](recipes/zephyr-7b-beta/dpo/config_full.yaml) for more details about the hyperparameters.
+
+The evaluation is based on the official repositories of [Open LLM Leaderboard](GitHub - EleutherAI/lm-evaluation-harness: A framework for few-shot evaluation of language models.), [AlpacaEval](GitHub - tatsu-lab/alpaca_eval: An automatic evaluator for instruction-following language models. Hu) and [MT-Bench](FastChat/fastchat/llm_judge at main · lm-sys/FastChat). We refer to the official repositories for more details about the evaluation procedure.
+
+## Citation
+
+If you find this repository helpful, please kindly cite our paper:
+
+```bibtex
+@article{ji2024reinforcement,
+  title={Reinforcement learning from human feedback with active queries},
+  author={Ji, Kaixuan and He, Jiafan and Gu, Quanquan},
+  journal={arXiv preprint arXiv:2402.09401},
+  year={2024}
+}
+```
+
+## Acknowledgement
+
+This repo is built upon The [Alignment Handbook](GitHub - huggingface/alignment-handbook: Robust recipes to align language models with human and AI p). We thank the authors for their great work.
