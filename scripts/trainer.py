@@ -698,9 +698,6 @@ class DPOTrainer(Trainer):
 
         self.data_selection = data_selection
         self.gamma = gamma
-        self.use_labeled = 0
-        self.predicted_label = 0
-        self.counter = 0
 
 
     @staticmethod
@@ -1070,12 +1067,7 @@ class DPOTrainer(Trainer):
             counter = torch.zeros_like(chosen_rewards).to(chosen_rewards.device)
             counter[(chosen_rewards - rejected_rewards).abs() > self.gamma] = 1
             neglected = torch.count_nonzero(counter).detach().cpu()
-            self.use_labeled += (counter.shape[0] - neglected)
-            self.predicted_label += neglected
-            # print(self.use_labeled, self.predicted_label)
-            # print(flag)
             flag.requires_grad = False
-
             logits = (chosen_logratios - rejected_logratios)*flag
 
 
@@ -1386,8 +1378,6 @@ class DPOTrainer(Trainer):
             metrics[f"{prefix}nll_loss"] = model_output["nll_loss"].detach().mean().cpu()
         if self.aux_loss_enabled:
             metrics[f"{prefix}aux_loss"] = model_output["aux_loss"].detach().cpu()
-        metrics[f"{prefix}use_label"] = float(self.use_labeled)
-        metrics[f"{prefix}pred_label"] = float(self.predicted_label)
 
 
         return losses.mean(), metrics
