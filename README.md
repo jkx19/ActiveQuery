@@ -61,7 +61,7 @@ ACCELERATE_LOG_LEVEL=info accelerate launch --config_file recipes/accelerate_con
 
 In both commands, `\beta` is the weight of the KL divergence term in the loss function, and `data_selection` is a boolean flag to enable active querying. When active-querying is enabled, `Gamma` is the confidence threshold $\gamma$ for active querying. Please refer to the [recipe file for Zephyr-β](recipes/zephyr-7b-beta/dpo/config_full.yaml) or [recipe file for Zephyr-gemma](recipes/zephyr-7b-beta/dpo/config_full.yaml) for more details about the hyperparameters.
 
-The evaluation is based on the official repositories of [Open LLM Leaderboard](GitHub - EleutherAI/lm-evaluation-harness: A framework for few-shot evaluation of language models.), [AlpacaEval](https://github.com/tatsu-lab/alpaca_eval) and [MT-Bench](https://github.com/lm-sys/FastChat/tree/main/fastchat/llm_judge). We refer to the official repositories for more details about the evaluation procedure.
+The evaluation is based on the official repositories of [Open LLM Leaderboard](GitHub - https://github.com/EleutherAI/lm-evaluation-harness), [AlpacaEval](https://github.com/tatsu-lab/alpaca_eval) and [MT-Bench](https://github.com/lm-sys/FastChat/tree/main/fastchat/llm_judge). We refer to the official repositories for more details about the evaluation procedure.
 
 ## Citation
 
