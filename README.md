@@ -78,4 +78,4 @@ If you find this repository helpful, please kindly cite our paper:
 
 ## Acknowledgement
 
-This repo is built upon The [Alignment Handbook](GitHub - huggingface/alignment-handbook: Robust recipes to align language models with human and AI p). We thank the authors for their great work.
+This repo is built upon The [Alignment Handbook](https://github.com/huggingface/alignment-handbook). We thank the authors for their great work.
