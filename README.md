@@ -15,7 +15,7 @@ Authors: Kaixuan Ji*, Jiafan He*, Quanquan Gu
 
 ## About ADPO
 
-Active Direct Preference Optimization (ADPO) serves as a query-efficient alternative to direct prefernce optimization (DPO). More Specifically, at each training step, ADPO first compute estimate the model's uncertainty of each preference pair. ADPO only queries for the preference labels of those pairs with low confidence scores. For the pairs with high confidence scores, ADPO uses the predicted preference label (pseudo-label) to update the model. Experiments on Zephyr-β and Zephyr-gemma shows that ADPO matches the performance of DPO with only one quarters of queries needed. You can check our [paper](https://arxiv.org/abs/2402.09401) for more details.
+Active Direct Preference Optimization (ADPO) is a query-efficient alternative to direct prefernce optimization (DPO). More Specifically, at each training step, ADPO first compute estimate the model's uncertainty of each preference pair. ADPO only queries for the preference labels of those pairs with low confidence scores. For the pairs with high confidence scores, ADPO uses the predicted preference label (pseudo-label) to update the model. Experiments on Zephyr-β and Zephyr-gemma shows that ADPO matches the performance of DPO with only one quarters of queries needed. For more details, please refer to our [paper](https://arxiv.org/abs/2402.09401).
 
  <p align="center">
   <img src="images/queries.png">

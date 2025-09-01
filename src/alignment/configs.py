@@ -16,10 +16,11 @@ import dataclasses
 import os
 import sys
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, NewType, Optional, Tuple, Literal
+from typing import Any, Dict, List, NewType, Optional, Tuple
 
-import transformers
 from transformers import MODEL_FOR_CAUSAL_LM_MAPPING, HfArgumentParser
+
+import trl
 
 
 MODEL_CONFIG_CLASSES = list(MODEL_FOR_CAUSAL_LM_MAPPING.keys())
@@ -57,6 +58,7 @@ class H4ArgumentParser(HfArgumentParser):
             inputs = {k: v for k, v in vars(data_yaml).items() if k in keys}
             for arg, val in other_args.items():
                 # add only if in keys
+
                 if arg in keys:
                     base_type = data_yaml.__dataclass_fields__[arg].type
                     inputs[arg] = val
@@ -69,7 +71,7 @@ class H4ArgumentParser(HfArgumentParser):
                         inputs[arg] = [str(v) for v in val.split(",")]
 
                     # bool of a non-empty string is True, so we manually check for bools
-                    if base_type == bool:
+                    if base_type is bool:
                         if val in ["true", "True"]:
                             inputs[arg] = True
                         else:
@@ -111,7 +113,7 @@ class ModelArguments:
 
     base_model_revision: Optional[str] = field(
         default=None,
-        metadata={"help": ("The base model checkpoint for weights initialization with PEFT adatpers.")},
+        metadata={"help": ("The base model checkpoint for weights initialization with PEFT adapters.")},
     )
     model_name_or_path: Optional[str] = field(
         default=None,
@@ -136,12 +138,20 @@ class ModelArguments:
             "choices": ["auto", "bfloat16", "float16", "float32"],
         },
     )
-    trust_remote_code: bool = field(default=False, metadata={"help": "Trust remote code when loading a model."})
-    use_flash_attention_2: bool = field(
-        default=False,
+    tokenizer_name_or_path: Optional[str] = field(
+        default=None,
         metadata={
             "help": (
-                "Whether to use flash attention 2. You must install this manually by running `pip install flash-attn --no-build-isolation`"
+                "The path to the tokenizer. Useful if you want to use a different tokenizer to the one stored in `model_name_or_path`."
+            )
+        },
+    )
+    trust_remote_code: bool = field(default=False, metadata={"help": "Trust remote code when loading a model."})
+    attn_implementation: Optional[str] = field(
+        default=None,
+        metadata={
+            "help": (
+                "Which attention implementation to use; you can use --attn_implementation=flash_attention_2, in which case you must install this manually by running `pip install flash-attn --no-build-isolation`"
             )
         },
     )
@@ -176,6 +186,10 @@ class ModelArguments:
         default="nf4", metadata={"help": "precise the quantization type (fp4 or nf4)"}
     )
     use_bnb_nested_quant: bool = field(default=False, metadata={"help": "use nested quantization"})
+    bnb_4bit_quant_storage: Optional[str] = field(
+        default="uint8",
+        metadata={"help": "storage type to pack the quanitzed 4-bit prarams."},
+    )
 
     def __post_init__(self):
         if self.load_in_8bit and self.load_in_4bit:
@@ -193,27 +207,17 @@ class DataArguments:
         default=None,
         metadata={"help": ("Datasets and their proportions to be used for training ift/rl.")},
     )
+    text_column: Optional[str] = field(
+        default="text",
+        metadata={"help": "The column name to use for the text in the dataset (only used for continued pretraining)."},
+    )
     dataset_splits: Optional[List[str]] = field(
         default_factory=lambda: ["train", "test"],
         metadata={"help": ("List of train test splits to use in the dataset")},
     )
-    max_train_samples: Optional[int] = field(
+    dataset_configs: Optional[List[str]] = field(
         default=None,
-        metadata={
-            "help": (
-                "For debugging purposes or quicker training, truncate the number of training examples to this "
-                "value if set."
-            )
-        },
-    )
-    max_eval_samples: Optional[int] = field(
-        default=None,
-        metadata={
-            "help": (
-                "For debugging purposes or quicker training, truncate the number of evaluation examples to this "
-                "value if set."
-            )
-        },
+        metadata={"help": "List of dataset config names. If given must be the same length as 'dataset_mixer' keys."},
     )
     preprocessing_num_workers: Optional[int] = field(
         default=None,
@@ -222,35 +226,23 @@ class DataArguments:
     truncation_side: Optional[str] = field(
         default=None, metadata={"help": "Truncation side to use for the tokenizer."}
     )
-
-
-@dataclass
-class SFTConfig(transformers.TrainingArguments):
-    """
-    Arguments related to the training process itself. For all parameters, see: https://huggingface.co/docs/transformers/v4.26.1/en/main_classes/trainer#transformers.TrainingArguments
-    """
-
-    max_seq_length: Optional[int] = field(
-        default=None,
-        metadata={"help": ("Used by TRL for reward model training, which tries to read this parameter in init.")},
-    )
-    logging_first_step: bool = field(
+    auto_insert_empty_system_msg: bool = field(
         default=True,
-        metadata={"help": ("Whether to log and evaluate the first global_step or not.")},
+        metadata={
+            "help": (
+                "Whether to automatically insert an empty system message as the first message if `system` is mentioned in the chat template."
+            )
+        },
     )
-    optim: Optional[str] = field(default="adamw_torch")
 
 
 @dataclass
-class DPOConfig(transformers.TrainingArguments):
+class SFTConfig(trl.SFTConfig):
     """
-    Arguments related to the DPO training process itself. For all parameters, see: https://huggingface.co/docs/transformers/v4.26.1/en/main_classes/trainer#transformers.TrainingArguments
+    Arguments related to the training process itself. For all parameters, see: https://huggingface.co/docs/transformers/v4.39.3/en/main_classes/trainer#transformers.TrainingArguments
+    Also used for the continued pretraining task.
     """
 
-    beta: Optional[float] = field(
-        default=0.1,
-        metadata={"help": "The beta factor in DPO loss. Higher beta means less divergence from the initial policy."},
-    )
     hub_model_revision: Optional[str] = field(
         default="main",
         metadata={"help": ("The Hub model branch to push the model to.")},
@@ -259,16 +251,23 @@ class DPOConfig(transformers.TrainingArguments):
         default=True,
         metadata={"help": ("Whether to log and evaluate the first global_step or not.")},
     )
-    max_prompt_length: Optional[int] = field(
-        default=None,
-        metadata={"help": ("For DPO, the maximum length of the prompt to use for conditioning the model.")},
+
+
+@dataclass
+class DPOConfig(trl.DPOConfig):
+    """
+    Arguments related to the DPO training process itself. For all parameters, see: https://huggingface.co/docs/transformers/v4.39.3/en/main_classes/trainer#transformers.TrainingArguments
+    """
+
+    hub_model_revision: Optional[str] = field(
+        default="main",
+        metadata={"help": ("The Hub model branch to push the model to.")},
     )
-    max_length: Optional[int] = field(
-        default=None,
-        metadata={"help": ("Used by TRL for reward model training, which tries to read this parameter in init.")},
+    logging_first_step: bool = field(
+        default=True,
+        metadata={"help": ("Whether to log and evaluate the first global_step or not.")},
     )
     optim: Optional[str] = field(default="rmsprop")
     remove_unused_columns: bool = field(default=False)
-    loss_type: Literal["sigmoid", "hinge", "corr"]=field(default="sigmoid")
-    data_selection: bool=field(default=False)
-    Gamma: float=field(default=0.02)
+    data_selection: bool = field(default=False)
+    gamma: float = field(default=2.0)
